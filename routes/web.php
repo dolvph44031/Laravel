@@ -3,6 +3,7 @@
 use App\Http\Controllers\User\ProductController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\BannerController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\User\CategoryController;
 use App\Models\Product;
@@ -48,6 +49,11 @@ Route::get('auth/register', [RegisterController::class, 'index'])
 ->name('register');
 Route::post('auth/register', [RegisterController::class, 'register'])
 ->name('register');
+
+// //banner
+// Route::get('/banner', [BannerController::class, 'index'])->name('home');
+
+
 
 // Chi tiết sản phẩm
 // Route::get('products/{id}', [ProductController::class, 'show'])->name('products.show');

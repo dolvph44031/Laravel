@@ -1,137 +1,142 @@
 @extends('users.layouts.master')
 @section('content')
-<header>
-    <div class="d-flex justify-content-end">
-        @if (Route::has('login'))
-            <div class="sm:fixed sm:top-0 sm:right-0 p-6 text-right z-10">
-                @auth
-                    <a href="{{ url('/home') }}"
-                       class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Home</a>
-                @else
-                    <a href="{{ route('login') }}"
-                       class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Log
-                        in</a>
-
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}"
-                           class="ml-4 font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Register</a>
-                    @endif
-                @endauth
-            </div>
-    @endif
-</header>
-<div class="row align-items-center justify-content-center">
-    <div class="row">
-        <div class="content pl-lg-3 pl-0">
-            <ul class="list-group">
-                <li class="list-group-item p-3">
-                    <h5 class="fw-bolder">Đơn hàng của bạn</h5>
-                </li>
-                @foreach($productVariants as $item)
-                    <li class="list-group-item">
-                        <div class="row align-items-center ">
-                            <div class="col-2">
-                                <div class="d-flex justify-content-center align-items-center"
-                                     style="width: 40px; height: 40px;">
-                                    @if(str_contains($item->product_img_thumb, 'products/'))
-                                        <img src="{{Storage::url($item->product_img_thumb)}}" alt="" class="mw-100 mh-100">
-                                    @else
-                                        <img src="{{$item->product_img_thumb}}" alt="" class="mw-100 mh-100">
-                                    @endif
-                                </div>
+<div class="container mt-4">
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Sản phẩm</th>
+                <th>Đơn giá</th>
+                <th>Số lượng</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($productVariants as $item)
+                <tr>
+                    <td>{{ $item->product_variant_id }}</td>
+                    <td>
+                        <div class="d-flex">
+                            <div class="bg-light rounded d-flex justify-content-center align-items-center"
+                                style="width: 60px; height: 50px;">
+                                <img src="{{ Storage::url($item->product_img_thumb) }}" alt="{{ $item->product_name }}" class="mh-100 mw-100">
                             </div>
-                            <div class="col-4">
-                                <span class="fw-bolder">{{$item->product_name}}</span>
-                                <span class="text-light">{{$item->product_sku}}</span>
-                                <span class="text-light">Phân loại: {{$item->variant_size_name}} x {{$item->variant_color_name}}</span>
-                            </div>
-                            <div class="col-2 text-center ">
-                                <span>{{$item->quantity}}</span>
-                            </div>
-                            <div class="col-4 text-end">
-                                <span style="text-decoration: line-through; color:gray;">
-                                    {{$item->product_price_sale ? $item->product_price : ''}}
-                                </span>
-                                <span>{{$item->product_price_sale ?: $item->product_price}}</span>
-                            </div>
+                            <p class="ms-3">{{ $item->product_name }}</p>
                         </div>
-                    </li>
-                @endforeach
-                <li class="list-group-item d-grid gap-2">
-                    <div class="d-flex justify-content-between align-items-center ">
-                        <span>Tạm tính</span>
-                        <span>{{$totalAmount}}</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center ">
-                        <span>Shipping</span>
-                        <span>0</span>
-                    </div>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                    <span class="fw-bold">Tổng</span>
-                    <span class="fw-bold text-danger ">{{$totalAmount}} </span>
-                </li>
-            </ul>
+                    </td>
+                    <td>{{ number_format($item->product_price_sale ?: $item->product_price) }} đ</td>
+                    <td>
+                        <div class="d-flex justify-content-between">
+                            <a href="#" class="text-black" onclick="decreaseQuantity({{ $item->product_variant_id }})"><i class="fa-solid fa-minus"></i></a>
+                            <p>{{ $item->quantity }}</p>
+                            <a href="#" class="text-black" onclick="increaseQuantity({{ $item->product_variant_id }})"><i class="fa-solid fa-plus"></i></a>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn btn-danger ms-2" onclick="onClickDelete({{ $item->product_variant_id }})"><i class="fa-solid fa-trash"></i> Xóa</button>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
+
+<div class="container">
+    <div class="d-flex justify-content-center mt-4">
+        <div class="col-6 d-flex justify-content-between">
+            <div class="d-flex">
+                <i class="fa-solid fa-file fs-2"></i>
+                <p class="ms-3">Mã giảm giá</p>
+            </div>
+            <p>Chọn hoặc nhập mã</p>
         </div>
     </div>
-    <form action="{{route('order.add')}}" class="container mt-4 d-flex justify-content-around" method="POST">
-        @csrf
-        <input type="hidden" name="productVariants" value="{{$productVariants}}">
-        <input type="hidden" name="userId" value="{{$userId}}">
-        <input type="hidden" name="totalAmount" value="{{$totalAmount}}">
-        <div class="col-md-5">
-            <h3>Thông tin người mua hàng</h3>
-            <div class="mb-3">
-                <label class="form-label">Họ tên:</label>
-                <input type="text" class="form-control" name="user_name" placeholder="">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Số điện thoại:</label>
-                <input type="text" class="form-control" name="user_phone" placeholder="">
-            </div>
-            <div class="mb-3">
-                <label for="exampleFormControlInput1" class="form-label">Emai:</label>
-                <input type="text" class="form-control" name="user_email" placeholder="">
-            </div>
-            <div class="mb-3">
-                <label for="exampleFormControlInput1" class="form-label">Địa chỉ:</label>
-                <input type="text" class="form-control" name="user_address" placeholder="">
-            </div>
-            <div class="mb-3 ">
-                <label class="card-title mb-2">Chọn hình thức thanh toán</label>
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <input class="form-check-input" type="radio" name="payment" id="cod" value="cod">
-                        <label class="form-check-label" for="cod">Thanh toán khi nhận hàng</label>
-                    </li>
-                </ul>
-            </div>
-            <div class="d-flex justify-content-end">
-                <button class="btn btn-primary" type="submit">Thanh toán</button>
-            </div>
-        </div>
-        <div class="col-md-5">
-            <h3>Thông tin nhận hàng</h3>
-            <div class="mb-3">
-                <label class="form-label">Họ tên:</label>
-                <input type="text" class="form-control" name="receiver_name" placeholder="">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Số điện thoại:</label>
-                <input type="text" class="form-control" name="receiver_phone" placeholder="">
-            </div>
-            <div class="mb-3">
-                <label for="exampleFormControlInput1" class="form-label">Emai:</label>
-                <input type="text" class="form-control" name="receiver_email" placeholder="">
-            </div>
-            <div class="mb-3">
-                <label for="exampleFormControlInput1" class="form-label">Địa chỉ:</label>
-                <input type="text" class="form-control" name="receiver_address" placeholder="">
-            </div>
-        </div>
-
-
-    </form>
 </div>
+
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-4"></div>
+        <div class="col-4">
+            <div class="container mt-3">
+                <form action="" method="POST" class="border border-2 rounded-4 text-center">
+                    @csrf
+                    <div class="d-flex justify-content-center mt-3">
+                        <h5 class="">Tổng tiền tạm tính:</h5>
+                        <h5 class="text-danger ms-3">{{ number_format($totalAmount) }} V</h5>
+                    </div>
+                    <div class="container d-flex justify-content-center">
+                        <button type="submit" class="btn btn-outline-primary mb-3 mt-4" style="width: 210px;">Đặt Hàng</button>
+                    </div>
+                    <div class="container d-flex justify-content-center">
+                        <a href="{{ route('home') }}" class="btn btn-outline-secondary mb-3">Chọn thêm sản phẩm khác</a>
+                    </div>                    
+                </form>
+            </div>
+        </div>
+        <div class="col-4"></div>
+    </div>
+</div>
+
 @endsection
+
+@section('scripts')
+<script>
+    function decreaseQuantity(id) {
+        fetch(`/cart/decrease/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ id: id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload(); // Reload to reflect changes
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function increaseQuantity(id) {
+        fetch(`/cart/increase/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ id: id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload(); // Reload to reflect changes
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function onClickDelete(id) {
+        if (confirm('Are you sure you want to delete this item?')) {
+            fetch(`/cart/delete/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ id: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // Reload to reflect changes
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    }
+</script>
+@endsection
+
 

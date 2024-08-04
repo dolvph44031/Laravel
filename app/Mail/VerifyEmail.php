@@ -36,7 +36,7 @@ class VerifyEmail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Xác nhận tài khoản hệ thống 04_WD18311_BL2', // tiêu đề email
+            subject: 'Xác nhận tài khoản hệ thống Lê Văn Đô', // tiêu đề email
         );
     }
 

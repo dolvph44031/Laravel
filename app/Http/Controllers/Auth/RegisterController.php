@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Mail\VerifyEmail as MailVerifyEmail;
+use App\Mail\VerifyEmail;
 use App\Models\User;
-use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -32,22 +31,16 @@ class RegisterController extends Controller
 
         // Hash the password before saving
         $data['password'] = Hash::make($data['password']);
-        // tạo tài khoản
-        $user = User::query()->create($data);
-        // dd($request->all);
-        //gửi email xác nhận
+
+        // Tạo tài khoản
+        $user = User::create($data);
+
+        // Gửi email xác nhận
         $token = base64_encode($user->email);
-        Mail::to($user->email)->send(new MailVerifyEmail($user->name, $token));
-        //   // Login bằng tk user vừa tạo
-        //   Auth::login($user);
-        //   // generate lại token
-        //   $request->session()->regenerate();
-        Mail::raw('This is a test email', function ($message) {
-            $message->to('dolvph44031@fpt.edu.vn')->subject('Test Email');
-        });        
+        Mail::to($user->email)->send(new VerifyEmail($user->name, $token));
         return redirect()->intended('/'); // interded back lại trang trước khi đăng nhập tài khoản.
     }
-    public function verifyEmail($token)
+    public function verify($token)
     {
         $email = base64_decode($token);
         $user = User::where('email', $email)->first();
@@ -55,9 +48,9 @@ class RegisterController extends Controller
         if ($user) {
             // Update user status to verified
             $user->update(['email_verified_at' => now()]);
-            return redirect()->route('login')->with('status', 'Email verified successfully! You can now log in.');
+            return redirect()->route('login')->with('status', 'Email đã được xác minh thành công! Bây giờ bạn có thể đăng nhập.');
         }
 
-        return redirect()->route('login')->withErrors('Invalid verification link.');
+        return redirect()->route('login')->withErrors('Liên kết xác minh không hợp lệ.');
     }
 }

@@ -1,6 +1,12 @@
 @extends('users.layouts.master')
 
 @section('content')
+@if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+
     <div class="container mt-5">
         <div class="row align-items-start">
             <!-- Hình ảnh sản phẩm -->
@@ -87,7 +93,7 @@
                         <!-- Nút thêm vào giỏ hàng và mua ngay -->
                         <!-- Nút thêm vào giỏ hàng và mua ngay -->
                         <div class="d-flex gap-2">
-                            <form action="{{ route('cart.add') }}" method="POST">
+                            <form action="{{ route('cart.list') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                                 <input type="hidden" name="product_size_id" value="{{ $id }}">
@@ -96,14 +102,17 @@
                                 <button class="btn btn-primary btn-custom" type="submit">Thêm Vào Giỏ</button>
                             </form>
 
-                            <form action="{{ route('cart.buyNow') }}" method="POST">
+                            <form action="{{ route('cart.buyNow') }}" method="POST" class="d-flex flex-grow-1">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                <input type="hidden" name="product_size_id" value="{{ $id }}">
-                                <input type="hidden" name="product_color_id" value="{{ $id }}">
+                                <input type="hidden" name="product_size_id" value="{{ $product->size_id }}">
+                                <input type="hidden" name="product_color_id" value="{{ $product->color_id }}">
                                 <input type="hidden" name="quantity" value="1">
-                                <button class="btn btn-success btn-custom" type="submit">Mua Ngay</button>
+                                <button type="submit" class="btn btn-primary flex-grow-1">
+                                    <i class="fas fa-shopping-cart me-1"></i> Mua Ngay
+                                </button>
                             </form>
+                            
                         </div>
 
                         <!-- CSS inline hoặc trong tệp CSS -->

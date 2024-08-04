@@ -1,10 +1,37 @@
 @extends('users.layouts.master')
 
-@section('title')
-    <h4 class="mt-4">Sản Phẩm Hot</h4>
-@endsection
-
 @section('content')
+<div class="container-fluid mt-2">
+    <div id="carouselExampleRide" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            @foreach ($banners as $index => $banner)
+                <button type="button" data-bs-target="#carouselExampleRide" data-bs-slide-to="{{ $index }}"
+                    class="{{ $index === 0 ? 'active' : '' }}"></button>
+            @endforeach
+        </div>
+        <div class="carousel-inner">
+            @foreach ($banners as $index => $banner)
+                <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                    <img src="{{ Storage::url($banner->image) }}" class="d-block w-100" style="height: 420px;" alt="...">
+                </div>
+            @endforeach
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleRide" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleRide" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</div>
+<h4 class="mt-4">Sản Phẩm Hot</h4>
+@if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
 <div class="container mt-4">
     <div class="row">
         @foreach ($products->slice(0, 8) as $product)
@@ -45,13 +72,21 @@
                     </div>
                     
                     <div class="card-footer d-flex justify-content-between">
-                        <a href="#" class="btn btn-primary flex-grow-1">
-                            <i class="fas fa-shopping-cart me-1"></i> Mua Ngay
-                        </a>
-                        <a href="#" class="btn btn-outline-secondary ms-2">
+                        <form action="{{ route('cart.add') }}" method="POST" class="d-flex flex-grow-1">
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                            <input type="hidden" name="product_size_id" value="{{ $product->size_id }}">
+                            <input type="hidden" name="product_color_id" value="{{ $product->color_id }}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-primary flex-grow-1">
+                                <i class="fas fa-shopping-cart me-1"></i> Mua Ngay
+                            </button>
+                        </form>
+                        <a href="{{ route('cart.add', ['product_id' => $product->id, 'product_size_id' => $product->size_id, 'product_color_id' => $product->color_id, 'quantity' => 1]) }}" class="btn btn-outline-secondary ms-2">
                             <i class="far fa-heart"></i>
-                        </a>
+                        </a>                            
                     </div>
+                           
                 </div>
             </div>
         @endforeach

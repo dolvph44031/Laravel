@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Banner;
 use App\Models\Home;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -18,7 +19,11 @@ class HomeController extends Controller
          // hiển thị view home
         $products = Product::orderBy('created_at', 'desc')->take(10)->get();
         
-        return view('users.home', compact('products'));
+       // Lấy tất cả các banner
+       $banners = Banner::all();
+
+       // Trả về view với cả hai dữ liệu
+       return view('users.home', compact('products', 'banners'));
     }
 
     /**

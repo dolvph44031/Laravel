@@ -1,6 +1,12 @@
 @extends('users.layouts.master')
 
 @section('content')
+@if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+
     <div class="container mt-4">
         <h1>{{ $category->name }}</h1> <!-- Hiển thị tên danh mục -->
 
@@ -49,14 +55,18 @@
                             <form action="{{ route('cart.add') }}" method="POST" class="d-flex flex-grow-1">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                <input type="hidden" name="product_size_id" value="{{ $product->size_id }}">
+                                <input type="hidden" name="product_color_id" value="{{ $product->color_id }}">
+                                <input type="hidden" name="quantity" value="1">
                                 <button type="submit" class="btn btn-primary flex-grow-1">
                                     <i class="fas fa-shopping-cart me-1"></i> Mua Ngay
                                 </button>
                             </form>
-                            <a href="#" class="btn btn-outline-secondary ms-2">
+                            <a href="{{ route('cart.add', ['product_id' => $product->id, 'product_size_id' => $product->size_id, 'product_color_id' => $product->color_id, 'quantity' => 1]) }}" class="btn btn-outline-secondary ms-2">
                                 <i class="far fa-heart"></i>
-                            </a>
+                            </a>                            
                         </div>
+                                                
 
                     </div>
                 </div>
